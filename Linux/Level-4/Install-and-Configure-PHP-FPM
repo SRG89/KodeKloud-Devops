@@ -1,0 +1,99 @@
+#Problem Statement:
+#
+#
+#The Nautilus application development team is planning to launch a 
+#new PHP-based application, which they want to deploy on Nautilus 
+#infra in Stratos DC. The development team had a meeting with the 
+#production support team and they have shared some requirements 
+#regarding the infrastructure. Below are the requirements they shared:
+#
+#
+#
+# a.Install nginx on app server 2,configure it to use 
+#   port 8092 and its document root should be /var/www/html.
+# b.Install php-fpm version 7.3 on app server 2,
+#   it should listen on port 9000
+# c.Configure php-fpm and nginx to work together.
+# d.Once configured correctly, you can test the website 
+#   using curl http://stapp02:8092/index.php command from jump host.
+#
+#
+# Solution Script:
+#
+#access the application server 2
+ssh steve@stapp02
+#switch to root user
+sudo su -
+#install nginx
+yum install -y nginx*
+#start and enable nginx
+systemctl start nginx && systemctl enable nginx
+#configure it to use port 8092
+sed -i 's/80/8092/g' /etc/nginx/nginx.conf
+#verify the changed port
+netstat -nap | grep LISTEN
+#-----------------------------------------
+#Installing steps for php-fpm 7.3
+
+#Step 1: Add EPEL and REMI Repository
+yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+yum -y install https://rpms.remirepo.net/enterprise/remi-release-8.rpm
+#Step 2: Install PHP 7.3 Packages
+dnf -y install dnf-utils
+dnf module reset php -y
+dnf module install php:remi-7.3 -y
+php -v
+#Step 3: Install PHP 7.3 Extensions
+dnf update
+yum install php73
+#---------------------------------------------------
+#Edit the Nginx configuration 
+vi /etc/nginx/nginx.conf
+cat /etc/nginx/nginx.conf
+#-----------------------------------------
+#edited nginx config to work with 
+#php-fpm is shown below
+#
+#
+#
+server {                                                                          
+        listen       8092;                                                      
+        listen       [::]:8092;                                                 
+        server_name  _;                                                         
+        root         /var/www/html;                                
+        # Load configuration files for the default server block.                
+        include /etc/nginx/default.d/*.conf;   
+        location ~ \.php$ {                                                     
+          try_files $uri = 404;                                                 
+          include fastcgi_params;                                               
+          fastcgi_pass  127.0.0.1:9000;                                         
+          fastcgi_index index.php;                                      
+          fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;    
+        }                                                                      
+        location /       
+        {                                                                       
+        index  index.php index.html index.htm;     
+        }                                                                       
+        error_page 404 /404.html;                                               
+        location = /404.html        
+#------------------------------------------------------------------------------
+#
+#
+#Test the nginx file
+nginx -t
+#configure php-fpm
+vi /etc/php-fpm.d/www.conf
+#-----------------------------------------
+#
+#update the user name from apache to nginx
+user = nginx
+group = nginx
+# restart the nginx
+systemctl restart nginx
+#validate the task by accessing the content 
+curl http://localhost:8092
+
+
+
+
+

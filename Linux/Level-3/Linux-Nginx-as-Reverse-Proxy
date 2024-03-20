@@ -1,0 +1,54 @@
+# Problem Statement
+#
+# Nautilus system admin's team is planning to deploy a front end application 
+# for their backup utility on Nautilus Backup Server, so that they can manage 
+# the backups of different websites from a graphical user interface. They have 
+# shared requirements to set up the same; please accomplish the tasks as per 
+# detail given below:
+#
+#
+#  a. Install Apache Server on Nautilus Backup Server and configure it to use 
+#  8085 port (do not bind it to 127.0.0.1 only, keep it default i.e let Apache
+#  listen on server's IP, hostname, localhost, 127.0.0.1 etc).
+#  b. Install Nginx webserver on Nautilus Backup Server and configure it to 
+#  use 8098.
+#  c. Configure Nginx as a reverse proxy server for Apache.
+#  d. There is a sample index file /home/thor/index.html on Jump Host, copy 
+#  that file to Apache's document root.
+#  e. Make sure to start Apache and Nginx services.
+#  f. You can test final changes using curl command, 
+#  e.g curl http://<backup server IP or Hostname>:8098
+#
+#
+#  Solution Script
+#
+#  access to the backup server
+ssh clint@stbkp01
+# switch to root user
+sudo su -
+# install nginx and apache server 
+yum install -y nginx httpd
+#configure the port of httpd
+sed -i 's/80/8085/g' /etc/httpd/conf/httpd.conf
+# change the port of the nginx server as well
+sed -i 's/80/8098/g' /etc/nginx/nginx.conf
+#configure the nginx to set proxy pass
+#
+#
+#---------------------------------------------
+location / {
+          proxy_pass http://localhost:8085;
+        }
+#---------------------------------------------
+#
+# transfer the index file from jump host to the 
+# bacup server
+scp ~/index.html clint@stbkp01:/var/www/html
+#start and enable the nginx and httpd server
+systemctl start nginx
+systemctl enable nginx
+systemctl start httpd
+systemctl enable httpd
+# validate task by accessing the content of file from jump host
+curl http://stbkp01:8098
+

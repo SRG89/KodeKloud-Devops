@@ -1,0 +1,53 @@
+# Problem Statement
+#
+# Recently some of the performance issues were observed with some 
+# applications hosted on Kubernetes cluster.The Nautilus DevOps team 
+# has observed some resources constraints, where some of the applications 
+# are running out of resources like memory, cpu etc.and some of the 
+# applications are consuming more resources than needed.Therefore, 
+# the team has decided to add some limits for resources utilization.
+@ Below you can find more details.
+#
+#
+# Create a pod named httpd-pod and a container under it named as 
+# httpd-container, use httpd image with latest tag only and remember 
+# to mention tag i.e httpd:latest and set the following limits:
+#
+# Requests: Memory: 15Mi, CPU: 100m
+# Limits: Memory: 20Mi, CPU: 100m
+#
+# Solution Script
+#
+# run a dry-run to manifest the yaml file for resource pod
+kubectl run httpd-pod --image=httpd:latest --dry-run=client -o yaml > app.yaml
+# edit the yaml file with specification as mentioned in task
+vi app.yaml
+cat app.yaml
+#---------------------------------
+# Yaml file after adding resources
+#
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: httpd-pod
+  name: httpd-pod
+spec:
+  containers:
+  - image: httpd:latest
+    name: httpd-container
+    resources: 
+      requests:
+        memory: "15Mi"
+        cpu: "100m"
+      limits:
+        memory: "20Mi"
+        cpu: "100m"
+#-----------------------------------------------------
+#
+# create resource pod from manifested file
+kubectl create -f app.yaml
+# validate the task by listing the resource pod
+kubectl get po -o wide
+
+

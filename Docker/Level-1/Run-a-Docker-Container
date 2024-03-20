@@ -1,0 +1,30 @@
+# Problem Statement
+#
+#Nautilus DevOps team is testing some applications deployment on 
+#some of the application servers. They need to deploy a nginx 
+#container on Application Server 2. Please complete the task as 
+#per details given below:
+#
+#
+#
+#On Application Server 2 create a container named nginx_2 
+#using image nginx with alpine tag and make sure container 
+#is in running state.
+#
+#
+# Solution Script:
+#
+#
+# access to application server 2
+ssh steve@stapp02
+#switch to root user
+sudo su -
+# check the images and containers in the server
+docker images -a
+docker ps -a
+# create a container as mentioned in the task
+docker run -d --name nginx_2 nginx:alpine
+# check the status of running container
+docker ps -a | grep nginx_2
+
+

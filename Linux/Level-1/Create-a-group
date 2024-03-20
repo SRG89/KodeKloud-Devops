@@ -1,0 +1,32 @@
+# Problem Statement:
+#
+# There are specific access levels for users defined by the xFusionCorp Industries system admin team. 
+# Rather than providing access levels to every individual user, the team has decided to create groups 
+# with required access levels and add users to that groups as needed.See the following requirements:
+#
+# (a) Create a group named nautilus_sftp_users in all App servers in Stratos Datacenter.
+# (b) Add the user stark to nautilus_sftp_users group in all App servers.(create the user if doesn't exist)
+#
+#
+# Solution Script:
+#
+#
+#
+#access application server using ssh command.We are only showing solution for application server one.
+#
+ssh tony@stapp01
+# switch to root user
+sudo su -
+#create group
+groupadd nautilus_sftp_users
+# check the user using id command and create if doesn't exist
+id stark
+useradd stark -g nautilus_sftp_users
+#check the created group using cat command
+cat /etc/group | grep nautilus_sftp_users
+#check the added user and group using id command
+id stark
+
+
+
+

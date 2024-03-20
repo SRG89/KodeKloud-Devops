@@ -1,0 +1,54 @@
+# Problem Statement
+#
+#
+#There is a requirement to Dockerize a Node app and to deploy the same 
+#on App Server 1.Under /node_app directory on App Server 1,
+#we have already placed a package.json file that describes the 
+#app dependencies and server.js file that defines a web app framework.
+#
+#
+#
+#Create a Dockerfile (name is case sensitive) under /node_app directory:
+#
+#Use any node image as the base image.
+#Install the dependencies using package.json file.
+#Use server.js in the CMD.
+#Expose port 8087.
+#The build image should be named as nautilus/node-web-app.
+#Now run a container named nodeapp_nautilus using this image.
+#Map the container port 8087 with the host port 8093.
+#
+#
+# Solution Script
+#
+#access to application server 1
+ssh stapp01
+#switch to root user
+sudo su -
+#change directory as instructed in task 
+cd /node_app
+#create a Dockerfile and verify the content
+vi Dockerfile
+cat Dockerfile
+#---------------------------------------------
+#
+#creating node app image
+FROM node:10-alpine
+WORKDIR /app
+COPY package.json ./
+RUN npm install
+COPY . .
+EXPOSE 8087
+CMD [ "node", "server.js" ]
+#----------------------------------------------
+#
+# Build docker image
+docker build -t nautilus/node-web-app .
+# run docker image
+docker run -d --name nodeapp_nautilus -p 8093:8087 nautilus/node-web-app:latest
+# list the running container
+docker ps 
+#validate the task by accessing the app content at mapped port
+curl http://localhost:8093
+
+

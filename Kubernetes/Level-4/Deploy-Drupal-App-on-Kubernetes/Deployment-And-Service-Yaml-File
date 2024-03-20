@@ -1,0 +1,125 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drupal-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: drupal-mysql-pod
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: drupal-mysql-pod
+    spec:
+      volumes:
+      - name: mysql-volm
+        persistentVolumeClaim:
+          claimName: drupal-mysql-pvc
+      containers:
+      - image: mysql:5.7
+        name: mysql-container
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: database
+              key: MYSQL_ROOT_PASSWORD
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: database
+              key: MYSQL_PASSWORD
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: database
+              key: MYSQL_DATABASE
+	- name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: database
+              key: MYSQL_USER
+        - name: MYSQL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: database
+              key: MYSQL_HOST
+        volumeMounts:
+        - name: mysql-volm
+          mountPath: /var/lib/mysql
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drupal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: drupal-pod
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: drupal-pod
+    spec:
+      containers:
+      - image: drupal:8.6
+        name: drupal-container
+        ports:
+        - containerPort: 80
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: database
+              key: MYSQL_ROOT_PASSWORD
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: database
+              key: MYSQL_PASSWORD
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: database
+              key: MYSQL_DATABASE
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: database
+	      key: MYSQL_USER
+        - name: MYSQL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: database
+              key: MYSQL_HOST
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: drupal-mysql-service
+spec:
+  selector:
+    app: drupal-mysql-pod
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: drupal-service
+spec:
+  type: NodePort
+  selector:
+    app: drupal-pod
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30095

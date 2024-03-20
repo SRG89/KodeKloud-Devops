@@ -1,0 +1,59 @@
+# Problem Statement
+#
+#
+# The Nautilus DevOps team is working to deploy one of the applications 
+# on App Server 1 in Stratos DC.Due to a misconfiguration in the docker 
+# compose file,the deployment is failing.We would like you to take a look 
+# into it to identify and fix the issues.More details can be found below:
+#
+# a.docker-compose.yml file is present on App Server 1 under /opt/docker 
+#   directory.
+# b.Try to run the same and make sure it works fine.
+# c.Please do not change the container names being used.
+#   Also, do not update or alter any other valid config settings 
+#   in the compose file or any other relevant data that can cause 
+#   app failure.
+#
+#
+# Solution Script
+#
+# access application server one 
+ssh tony@stapp01
+# switch to root user
+sudo su -
+# change directory as suggested in question
+cd /opt/docker
+# move all file from app to current directory
+mv ./app/* .
+# update the docker-compose file and validate the fixed error
+vi ./docker-compose.yml
+cat ./docker-compose.yml
+#--------------------------------------------------------------
+#
+#Docker-compose after fixing error
+#
+#
+version: '2'
+services:
+    web:
+        build: .
+        container_name: python
+        ports:
+            - "5000:5000"
+        volumes:
+            - .:/code
+        depends_on:
+            - redis
+    redis:
+        image: redis
+        container_name: redis
+#----------------------------------------------------------------------
+#
+#Run the docker-compose
+docker-compose -f docker-compose.yml up -d
+#Validate the task by accessing the content 
+curl http://localhost:5000
+#[Note: If both containers are running and anble to access the app
+#content then it validate the task]
+
+

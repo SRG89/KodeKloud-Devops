@@ -1,0 +1,41 @@
+# Problem Statement
+#
+#
+# Our monitoring tool has reported an issue in Stratos Datacenter.
+# One of our app servers has an issue, as its Apache service is not 
+# reachable on port 8088 (which is the Apache port). The service 
+# itself could be down, the firewall could be at fault, or something 
+# else could be causing the issue.
+#
+#
+#
+# Use tools like telnet, netstat, etc. to find and fix the issue. 
+# Also make sure Apache is reachable from the jump host without 
+# compromising any security settings.
+# Once fixed, you can test the same using 
+# command curl http://stapp01:8088 command from jump host.
+#
+#
+#
+# Solution Script
+#
+# ssh into application server one
+ssh tony@stapp01
+# valiate the status of httpd if not started please start it
+systemctl status httpd
+systemctl start httpd
+# If apache fail to start verify the cause of failure using journalctl
+journalctl -u httpd -f
+#since journalctl mentioned the port unavailability as cause of failure
+#verfiy service which is using the port allocated for httpd
+netstat -nap | grep LISTEN
+# since sendmail process is using the httpd port we need to kill
+# sendmail process
+pkill sendmail
+#now restart the httpd again
+systemctl restart httpd
+#delete all iptables rule and allow ports if firewall has been set up
+iptables -F
+#From jump host try to access the content of apache server
+curl http://stapp01:8088
+

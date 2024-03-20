@@ -1,0 +1,78 @@
+# Problem Statement:
+#
+#The Nautilus devops team got some requirements related to some Apache config changes.
+#They need to setup some redirects for some URLs.There might be some more changes need to be done.
+#Below you can find more details regarding that:
+#
+#
+#
+#1) httpd is already installed on app server 1. Configure Apache to listen on port 8082
+#
+#
+##Configure Apache to add some redirects as mentioned below:
+#
+#
+#a) Redirect http://stapp01.stratos.xfusioncorp.com:<Port>/ to http://www.stapp01.stratos.xfusioncorp.com:<Port>/ i.e non www to www.
+#    This must be a permanent redirect i.e 301
+#b) Redirect http://www.stapp01.stratos.xfusioncorp.com:<Port>/blog/ to http://www.stapp01.stratos.xfusioncorp.com:<Port>/news/. 
+#   This must be a temporary redirect i.e 302.
+#
+#
+#  Solution Script
+#
+# access application server three using ssh
+ssh tony@stapp01
+#switch to root user
+sudo su -
+#find the httpd config file
+find /etc/ -type f -name httpd.conf
+#edit the port as mentioned in the task
+vi /etc/httpd/conf/httpd.conf
+#validate the edited port 
+cat /etc/httpd/conf/httpd.conf | grep Listen
+#add the virtual host sever and redirect the path
+vi /etc/httpd/conf.d/main.conf
+#check the added contenct of the file
+cat /etc/httpd/conf.d/main.conf
+#------------------------------------------------------------------------------------
+#
+#Permanent
+<VirtualHost *:8082>
+        ServerName stapp01.stratos.xfusioncorp.com
+        Redirect 301 / http://www.stapp01.stratos.xfusioncorp.com:8082/
+</VirtualHost>
+#
+#
+#
+#
+#
+# Temporary
+<VirtualHost *:8082>
+        ServerName www.stapp01.stratos.xfusioncorp.com:8082/blog/
+        Redirect 302 /blog/ http://www.stapp01.stratos.xfusioncorp.com:8082/news/
+</VirtualHost>
+#
+#
+#
+#
+#-----------------------------------------------------------------------------------------
+#
+#start and enable httpd
+systemctl start httpd
+systemctl enable httpd
+# validate the port using netstat command as 
+# httpd must listen on 8082 port
+netstat -nap | grep LISTEN
+#validate the redirect content using curl
+#First curl cmd must redirect to new domain 
+curl http://stapp01.stratos.xfusioncorp.com:8082
+#curl to access the content of web after permanent change
+#Second curl cmd must display the content of files running in 
+#server
+curl http://www.stapp01.stratos.xfusioncorp.com:8082
+# curl to blog page of the application
+curl http://www.stapp01.stratos.xfusioncorp.com:8082/blog/
+#Last curl cmd must redirect /blog/ pages to /news/ pages.
+
+
+

@@ -1,0 +1,36 @@
+# Problem Statement
+#
+# The Nautilus DevOps team has some confidential data present on 
+# App Server 2 in Stratos Datacenter.There is a container 
+# ubuntu_latest running on the same server. We received a request 
+# to copy some of the data from the docker host to the container. 
+# Below are more details about the task:
+#
+#
+# On App Server 2 in Stratos Datacenter copy an encrypted file 
+# /tmp/nautilus.txt.gpg from docker host to ubuntu_latest container
+# (running on same server) in /home/ location. Please do not try to 
+# modify this file in any way.
+#
+#
+# Solution Script
+#
+#
+# access the application server 2
+ssh steve@stapp02
+# switch to root user
+sudo su -
+# list the running container
+docker ps -a
+# copy the docker host content to docker container
+docker cp /tmp/nautilus.txt.gpg ubuntu_latest:/home
+# access docker container using iteractive terminal option
+docker exec -it ubuntu_latest bash
+# Within docker conteiner change directory
+cd /home
+# check the presence of copied file within docker container
+ls -l -h | grep nautilus.txt.gpg
+#exit the container
+exit
+
+

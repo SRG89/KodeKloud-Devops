@@ -1,0 +1,61 @@
+# Problem Statement;
+#
+#There is a static website running in Stratos Datacenter.
+#They have already configured the app servers and code is 
+#already deployed there.To make it work properly, they need 
+#to configure LBR server.There are number of options for that, 
+#but team has decided to go with HAproxy.
+#FYI, apache is running on port 5004 on all app servers. 
+#Complete this task as per below details.
+#
+#
+#a.Install and configure HAproxy on LBR server using yum only and 
+#  make sure all app servers are added to HAproxy load balancer. 
+#  HAproxy must serve on default http port (Note: 
+#  Please do not remove stats socket /var/lib/haproxy/stats entry 
+#  from haproxy default config.).
+#
+#b.Once done, you can access the website using StaticApp button on the top bar.
+#
+# Solution Script:
+#
+# check the content of app running in the application servers using curl
+curl stapp01:5004; curl stapp02:5004; curl stapp03:5004;
+# access the load balancer server
+ssh loki@stlb01
+# switch to the root user
+sudo su -
+# install haproxy using yum
+yum install -y haproxy
+# start and enable haproxy
+systemctl start && enable haproxy
+# find the path of the haproxy configuration file
+find /etc/ -type f -name haproxy.cfg
+# configure the haproxy file
+vi /etc/haproxy/haproxy.cfg
+#--------------------------------------------
+#frontend main
+    bind *:80 # This need to be chaged to
+              # default http port(i.e.80)
+#############################################
+#Now we need to simply add backend app server
+#
+#backend app
+    balance     roundrobin
+    server  app1 stapp01:5004 check
+    server  app2 stapp02:5004 check
+    server  app3 stapp03:5004 check
+#---------------------------------------------
+#restart the haproxy
+systemctl restart haproxy
+# using netstat get the listening port for haproxy
+netstat -nap | grep LISTEN
+#If haproxy is exposed at default httpd port then access
+#the content of applications server using curl command
+curl http://localhost:80
+
+
+
+
+
+

@@ -1,0 +1,80 @@
+# Problem Statement
+#
+# The system admins team of xFusionCorp Industries needs to deploy 
+# a new application on App Server 1 in Stratos Datacenter.They have 
+# some pre-requites to get eady that server for application deployment.
+# Prepare the server as per requirements shared below:
+#
+#
+#
+# 1. Install and configure nginx on App Server 1.
+# 2. On App Server 1 there is a self signed SSL certificate and key present 
+#    at location /tmp/nautilus.crt and /tmp/nautilus.key. Move them to some 
+#    appropriate location and deploy the same in Nginx.
+# 3. Create an index.html file with content Welcome! under Nginx document root.
+# 4. For final testing try to access the App Server 1 link (
+#    either hostname or IP) from jump host using curl command. 
+#    For example curl -Ik https://<app-server-ip
+#
+#
+#  Solution Script:
+#
+# access to application server 0ne
+ssh tony@stapp01
+# switch to root user
+sudo su -
+# install nginx
+yum install -y nginx
+# move the SSL certificate and key to appropriate location
+mv /tmp/nautilus.crt /etc/pki/tls/certs
+mv /tmp/nautilus.key /etc/pki/tls/private
+# configure the nginx configuration file
+vi /etc/nginx/nginx.conf
+# verify the contenct of nginx.conf file
+cat /etc/nginx/nginx.conf
+#---------------------------------------------------
+#ssl certification and key path need to be added 
+# Settings for a TLS enabled server.
+
+     server {
+         listen       443 ssl http2 default_server;
+         listen       [::]:443 ssl http2 default_server;
+         server_name  _;
+         root         /usr/share/nginx/html;
+
+         ssl_certificate "/etc/pki/tls/certs/nautilus.crt";
+         ssl_certificate_key "/etc/pki/tls/private/nautilus.key";
+         ssl_session_cache shared:SSL:1m;
+         ssl_session_timeout  10m;
+         ssl_ciphers PROFILE=SYSTEM;
+         ssl_prefer_server_ciphers on;
+
+         # Load configuration files for the default server block.
+         include /etc/nginx/default.d/*.conf;
+
+         location / {
+         }
+
+         error_page 404 /404.html;
+             location = /40x.html {
+         }
+
+         error_page 500 502 503 504 /50x.html;
+             location = /50x.html {
+         }
+     }
+
+#--------------------------------------------------------------
+#
+#create index.html with some content at nginx document root
+echo 'Welcome!' > /usr/share/nginx/html/index.html
+# restart nginx server
+systemctl restart nginx
+# From the jump host access the app server one using curl
+# to validate the task
+curl -Ik https://stapp01:443
+
+
+
+
+

@@ -1,0 +1,36 @@
+# Problem Statement
+#
+# There is a static website running within a container named 
+# nautilus, this container is running on App Server 1.Suddenly,
+# we started facing some issues with the static website on App 
+# Server 1. Look into the issue to fix the same, you can find 
+# more details below:
+#
+#
+# Container's volume /usr/local/apache2/htdocs is mapped with the 
+# host's volume /var/www/html.
+#
+#
+# The website should run on host port 8080 on App Server 1 
+# i.e command curl http://localhost:8080/ should work on 
+# App Server 1.
+#
+# Solution Script
+#
+# access application server 1
+ssh tony@stapp01
+# switch to root user
+sudo su -
+# list all available images
+docker images -a
+# list all the containers
+docker ps -a
+# remove the containers
+docker rm -f $(docker ps -a)
+# create a container with specification per task
+docker run -d --name nautilus -v /var/www/html:/usr/local/apache2/htdocs -p 8080:80 httpd:latest
+# check the status of container
+docker ps -a 
+# validate the task by accessing the content of app within created container
+curl http://localhost:8080
+

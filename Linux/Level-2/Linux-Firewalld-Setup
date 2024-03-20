@@ -1,0 +1,36 @@
+# Problem Statement:
+#
+#To secure our Nautilus infrastructure in Stratos Datacenter we have decided to #install and configure firewalld on all app servers. We have Apache and Nginx se#rvices running on these apps. Nginx is running as a reverse proxy server for Ap#ache. We might have more robust firewall settings in the future, but for now we#have decided to go with the given requirements listed below:
+#
+# 
+#(a) Allow all incoming connections on Nginx port, i.e 80.
+#(b) Block all incoming connections on Apache port, i.e 8080.
+#(c) All rules must be permanent.
+#(d) Zone should be public.
+#(e) If Apache or Nginx services aren't running already,
+#    please make sure to start them.
+#
+# Solution Script:
+#
+# access all the application servers using ssh. We are only showing
+# solition for application server one
+ssh tony@stapp01
+#switch to the root user
+sudo su -
+#check the status of nginx and apache server
+systemctl status nginx httpd
+#install the firewall
+yum install -y firewalld
+#chek the status of firewalld
+firewall-cmd --state
+#start and enable firewalld
+systemctl start firewalld
+systemctl enable firewalld
+#Add the rules as mentioned in the task
+firewall-cmd --zone=public --add-port=80/tcp --permanent
+firewall-cmd --zone=public --remove-port=8080/tcp --permanent
+firewall-cmd --reload
+#restart the firewalld
+systemctl restart firewalld
+
+

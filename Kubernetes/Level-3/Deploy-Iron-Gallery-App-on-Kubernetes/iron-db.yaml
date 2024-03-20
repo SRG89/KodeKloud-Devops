@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    db: mariadb
+  name: iron-db-deployment-datacenter
+  namespace: iron-namespace-datacenter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      db: mariadb
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        db: mariadb
+    spec:
+      volumes:
+      - name: db
+        emptyDir: {}
+      containers:
+      - image: kodekloud/irondb:2.0
+        name: iron-db-container-datacenter
+        env:
+        - name: MYSQL_DATABASE
+          value: "database_apache"
+        - name: MYSQL_ROOT_PASSWORD
+          value: "rootpass"
+        - name: MYSQL_PASSWORD
+          value: "bannerpass123"
+        - name: MYSQL_USER
+          value: "banner"
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iron-db-service-datacenter
+  namespace: iron-namespace-datacenter
+spec:
+  selector:
+    db: mariadb
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iron-gallery-service-datacenter
+  namespace: iron-namespace-datacenter
+spec:
+  type: NodePort
+  selector:
+    run: iron-gallery
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 32678
+

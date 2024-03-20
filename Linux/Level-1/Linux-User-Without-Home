@@ -1,0 +1,17 @@
+# Problem statement:
+#
+#The system admins team of xFusionCorp Industries has set up a new tool on all app servers, 
+#as they have a requirement to create a service user account that will be used by that tool.
+#Create a user named siva in App Server 2 without a home directory
+#
+#
+# Solution Script
+#
+#
+#access application server two
+ssh steve@stapp02
+#switch to root user
+sudo su -
+#create user without home directory
+useradd -M siva
+

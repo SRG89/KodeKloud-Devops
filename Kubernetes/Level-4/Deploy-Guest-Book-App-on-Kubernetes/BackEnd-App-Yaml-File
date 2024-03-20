@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-master-pod
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: redis-master-pod
+    spec:
+      containers:
+      - image: redis
+        name: master-redis-datacenter
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            memory: "100Mi"
+            cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-master
+spec:
+  selector:
+    app: redis-master-pod
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+ ---
+ apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-slave
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: redis-slave-pod
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: redis-slave-pod
+    spec:
+      containers:
+      - image: gcr.io/google_samples/gb-redisslave:v3
+        name: slave-redis-datacenter
+        ports:
+        - containerPort: 6379
+        env:
+        - name: GET_HOSTS_FROM
+          value: dns
+        resources:
+          requests:
+            memory: "100Mi"
+            cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-slave
+spec:
+  selector:
+    app: redis-slave-pod
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379

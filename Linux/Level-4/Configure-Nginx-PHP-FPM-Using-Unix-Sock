@@ -1,0 +1,117 @@
+# Problem Statement
+#
+# The Nautilus application development team is planning to launch a 
+# new PHP-based application, which they want to deploy on Nautilus infra 
+# in Stratos DC. The development team had a meeting with the production 
+# support team and they have shared some requirements regarding the 
+# infrastructure. Below are the requirements they shared:
+#
+#
+#
+#
+# a. Install nginx on app server 1,configure it to use port 8098
+#    and its document root should be /var/www/html
+# b. Install php-fpm version 8.2 on app server 1, it must use the 
+#    unix socket /var/run/php-fpm/default.sock 
+#    (create the parent directories if don't exist).
+# c. Configure php-fpm and nginx to work together.
+# d. Once configured correctly, you can test the website using 
+#    curl http://stapp01:8097/index.php command from jump host.
+#
+#
+# Solution Script
+#
+# access the application server one
+ssh tony@stapp01
+# switch to root user
+sudo su -
+# install nginx and its dependencies
+yum install nginx*
+# start and enable nginx
+systemctl start nginx && systemctl enable nginx
+# change the default port to 8098
+sed -i 's/80/8098/g' /etc/nginx/nginx.conf
+# restart nginx
+systemctl restart nginx
+# install php-fpm version 8.2
+#
+# ------------------------------------------
+#  Instruction for php-fpm 8.2 installation
+# ------------------------------------------
+# Install EPEL repository:
+dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+#Install Remi repository:
+dnf -y install https://rpms.remirepo.net/enterprise/remi-release-8.rpm
+dnf module install php:remi-8.2
+#Install yum utilities:
+dnf -y install yum-utils
+#Enable php 8.2 Remi repository:
+dnf module reset php
+dnf module enable php:remi-8.2
+#Install PHP-8.2
+dnf install php
+#check the version
+php -v
+#-----------------------------------------------------------------------
+# ****NOTES:******
+#
+# NGINX web server (as reverse proxy) serves PHP applications through 
+# the FastCGI protocol (as a backend application server).NGINX employs 
+# PHP-FPM (FastCGI Process Manager),an alternative PHP FastCGI 
+# implementation that runs in the background as a daemon, listening 
+# for CGI requests.
+#
+# ********************************************************************
+#
+# To accept FastCGI requests from NGINX, PHP-FPM can either listen on 
+# a TCP/IP socket or UNIX domain socket. Whichever address we choose 
+# to use is what NGINX uses to connect (proxy requests) to PHP-FPM, 
+# using the fastcgi_pass directive.
+#
+#
+#-------------------------------------------------------------------------
+server {                                                                        
+        listen       8098;
+        listen       [::]:8098;
+        server_name  _;
+        root         /var/www/html;
+        # Load configuration files for the default server block.
+        include /etc/nginx/default.d/*.conf;
+        location ~ \.php$ {
+          try_files $uri = 404;
+          include fastcgi_params;
+          fastcgi_pass unix:/var/run/php-fpm/default.sock;
+          fastcgi_index index.php;
+          fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;
+         }
+        location /
+        {
+        index  index.php index.html index.htm;
+        }
+        error_page 404 /404.html;
+        location = /404.html
+#---------------------------------------------------------------------------
+#create the directory
+#mkdir -p /var/run/php-fpm/
+#configure the /etc/php-fpm.d/default.conf file
+vi /etc/php-fpm.d/www.conf
+#check the changed content of the file
+cat /etc/php-fpm.d/www.conf
+#-------------------------------------------------------------
+#changed updates in the new socket config file
+#Note: This value is mandatory.
+;listen = /var/run/php-fpm/default.sock
+#Set permissions for unix socket, if one is used.
+#In Linux, read/write permissions must be set in 
+#order to allow connections from a web server.
+#Default Values: user and group are set as the 
+#running user mode is set to 0660
+;listen.owner = nginx
+;listen.group = nginx
+;listen.mode = 0660
+------------------------------------------------------------
+#restart the nginx 
+systemctl restart nginx
+#validate the task by checking the content from the jump host
+curl http://stapp01:8098/index.php
+

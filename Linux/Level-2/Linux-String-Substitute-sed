@@ -1,0 +1,39 @@
+# Problem Statement:
+#
+#There is some data on Nautilus App Server 3 in Stratos DC. Data needs to be altered in several of the files. 
+#On Nautilus App Server 3, alter the /home/BSD.txt file as per details given below:
+#
+#a. Delete all lines containing word code and save results in /home/BSD_DELETE.txt file.
+#b. Replace all occurrence of word and to them and save results in /home/BSD_REPLACE.txt file.
+#
+#Note: Let's say you are asked to replace word to with from. In that case, make sure not to alter 
+#any words containing the string itself; for example upto, contributor etc.
+#
+#
+# Solution Script:
+#
+#
+# access to the application server three
+ssh banner@stapp03
+#switch to root user
+sudo su -
+#count the total occurance of string 'code' using cat and wc command
+cat /home/BSD.txt | grep -o code | wc -l
+#delete all lines containing string 'code' using sed command and save file
+sed '/\<code\>/d' /home/BSD.txt > /home/BSD_DELETE.txt
+# again, count the oocurance of the string code in the new text file
+cat /home/BSD_DELETE.txt | grep -o code | wc -l
+# If the above command gives count 0 then it will confirm the deletion of code string
+#count the total occurance of string 'and' using cat and wc command
+cat /home/BSD.txt | grep -o and | wc -l
+# replace all the occurance of string 'and' to 'them' using sed
+sed 's/\band\b/them/g' /home/BSD.txt > /home/BSD_REPLACE.txt
+#again,count the occurance of string 'them' in the new file
+cat home/BSD_REPLACE.txt | grep -o them | wc -l
+#If total occurance of string 'them' in new file matches total occurance of string 'and'
+#in old file then it will confirm the replacement of string and to them.
+
+
+
+
+

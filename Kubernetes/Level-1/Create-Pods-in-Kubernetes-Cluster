@@ -1,0 +1,48 @@
+# Problem Statement
+#
+#
+# The Nautilus DevOps team has started practicing some pods and services 
+# deployment on Kubernetes platform as they are planning to migrate most 
+# of their applications on Kubernetes platform.Recently one of the team 
+# members has been assigned a task to create a pod as per details 
+# mentioned below:
+#
+# Create a pod named pod-httpd using httpd image with latest tag only 
+# and remember to mention the tag i.e httpd:latest.
+# Labels app should be set to httpd_app,also container should be named 
+# as httpd-container.
+#
+#
+# Solution Script
+#
+#
+# use dry-run to manifest the yaml file for resource pod
+kubectl run pod-httpd --image=httpd:latest --dry-run=client -o yaml > app.yaml
+# edit the yaml file
+vi app.yaml
+cat app.yaml
+#
+#-----------------------------------------
+#
+# Add labels and container name
+#
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: httpd_app
+  name: pod-httpd
+spec:
+  containers:
+  - image: httpd:latest
+    name: httpd-container
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+#--------------------------------------------
+#
+#create a resource pod using yaml file
+kubectl create -f app.yaml
+#validate the task by listing the resource pod
+kubectl get po -o wide
+

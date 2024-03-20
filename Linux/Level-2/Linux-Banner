@@ -1,0 +1,25 @@
+# Problem Statement:
+#
+#During the monthly compliance meeting, it was pointed out that several servers in the Stratos DC do not have a valid banner.
+#The security team has provided serveral approved templates which should be applied to the servers to maintain compliance.
+#These will be displayed to the user upon a successful login.
+#
+#
+#Update the message of the day on all application and db servers for Nautilus.
+#Make use of the approved template located at /home/thor/nautilus_banner on jump host.
+#
+#
+# Solution Script:
+#
+# access all application and database servers.We are only showing solution for database server
+ssh peter@stdb01
+# switch to root user
+sudo su -
+# check the current message of the day using cat command
+cat /etc/motd
+# change the access privilege of the motd file
+chmod 777 /etc/motd
+# From the jump server transfer the message template into database server
+scp ~/nautilus_banner peter@stdb01:/etc/motd
+# switch back to database server and check the updated message
+cat /etc/motd

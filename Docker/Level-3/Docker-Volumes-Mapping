@@ -1,0 +1,46 @@
+# Problem Statement
+#
+#
+#The Nautilus DevOps team is testing applications containerization, 
+#which issupposed to be migrated on docker container-based environments 
+#soon.In today's stand-up meeting one of the team members has been 
+#assigned a task to create and test a docker container with certain 
+#requirements.Below are more details:
+#
+#
+# a.On App Server 3 in Stratos DC pull nginx image (preferably latest 
+#   tag but others should work too).
+# b.Create a new container with name beta from the image you just pulled.
+# c.Map the host volume /opt/sysops with container volume /tmp.
+#   There is an sample.txt file present on same server under /tmp; 
+#   copy that file to /opt/sysops.Also please keep the container 
+#   in running state.
+#
+# Solution Script:
+#
+# access application server 3
+ssh banner@stapp03
+# switch to root user
+sudo su -
+# list the available images
+docker images -a
+# pull the nginx image with latest tag
+docker pull nginx:latest
+# create a container while mapping host volm
+# with container volume
+docker run -d --name beta -v /opt/sysops:/tmp nginx:latest
+# copy the text file as mentioned in task
+cp /tmp/sample.txt /opt/sysops
+# access the container using executive privilege
+docker exec -it beta bash
+# within a container check the copied file at 
+# the mapped location
+ls -l -h /tmp | grep sample.txt
+# exit the container
+exit
+
+
+
+
+
+

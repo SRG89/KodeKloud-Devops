@@ -1,0 +1,51 @@
+# Problem Statement
+#
+#
+# The Nautilus DevOps team is working to test several Ansible modules on 
+# servers in Stratos DC.Recently they wanted to test the file creation on 
+# remote hosts using Ansible. Find below more details about the task:
+#
+#
+# Create an inventory file ~/playbook/inventory on jump host and add 
+# all app servers in it.
+#
+#
+# Create a playbook ~/playbook/playbook.yml to create a blank file 
+# /usr/src/web.txt on all app servers.
+#
+# The /usr/src/web.txt file permission must be 0777.
+#
+#
+# The user/group owner of file /usr/src/web.txt must be tony on 
+# app server 1, steve on app server 2 and banner on app server 3.
+#
+#
+# Inventory File
+#
+stapp01 ansible_host=stapp01.stratos.xfusioncorp.com
+ansible_connection=ssh ansible_user=tony ansible_ssh_pass='Ir0nM@n'
+#
+stapp02 ansible_host=stapp02.stratos.xfusioncorp.com
+ansible_connection=ssh ansible_user=steve ansible_ssh_pass='Am3ric@'
+#
+stapp03 ansible_host=stapp03.stratos.xfusioncorp.com
+ansible_connection=ssh ansible_user=banner ansible_ssh_pass='BigGr33n'
+#------------------------------------------------------------------------
+#
+#
+# Ansible Playbook
+#
+- hosts: all
+  become: yes
+  tasks:
+    - file:
+        path: /usr/src/web.txt
+        owner: "{{ ansible_user }}"
+	group: "{{ ansible_user }}"
+        state: touch
+        mode: '0777'
+#----------------------------------------------------------------
+#
+# Validate the task by running the playbook
+ansible-playbook -i inventory playbook.yml
+

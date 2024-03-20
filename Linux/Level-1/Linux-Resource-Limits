@@ -1,0 +1,20 @@
+# Problem Statement:
+#
+#On our Storage server in Stratos Datacenter we are having some issues where nfsuser user is holding hundred of processes, 
+#which is degrading the performance of the server. Therefore, we have a requirement to limit its maximum processes. 
+#Please set its maximum process limits as below:
+#
+# a. soft limit = 1024
+# b. hard_limit = 2025
+#
+# Solution Script
+#
+# accesss storage server using ssh command
+ssh natasha@ststor01
+# find the location of limits.conf file
+find /etc/ -type f -name limits.conf
+# within limits.conf file add the following
+nfsuser          soft    nproc           1024
+nfsuser          hard    nproc           2025
+# This will limit the number of processes nfsuser can hold.
+

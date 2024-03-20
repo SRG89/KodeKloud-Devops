@@ -1,0 +1,45 @@
+# Problem Statement
+#
+#
+# Some of the developers from Nautilus project team have asked for SFTP access to at least one of the app server in Stratos DC. 
+# After going through the requirements, the system admins team has decided to configure the SFTP server on App Server 2 server 
+# in Stratos Datacenter.Please configure it as per the following instructions:
+#
+#
+# a. Create a SFTP user yousuf and set its password to LQfKeWWxWD. There is already a group called ftp, you can utilise the same.
+# b. Password authentication should be enabled for this user.
+# c. SFTP user should only be allowed to make SFTP connections.
+#
+#
+# Solution Script
+#
+#
+# access application server using ssh connection
+ssh steve@stapp02
+# change to root user
+sudo su -
+# Set up an SFTP directory and assign the permission
+mkdir -p /data
+chmod 701 /data
+# Create an SFTP user and setup password
+useradd yousuf -g ftp -s /sbin/nologin -d /yousuf
+passwd yousuf
+# Set up a new user SFTP directory 
+mkdir -p /data/yousuf
+chown -R root:ftp /data/yousuf
+# Configure sshd 
+vi /etc/ssh/sshd_config
+# validate the added content
+cat /etc/ssh/sshd_config
+#-----------------------------
+#SFTP configuration
+Match Group ftp
+ChrootDirectory /data/%u
+ForceCommand internal-sftp
+#------------------------------
+#
+#
+#save the file and restart the sshd service
+systemctl restart sshd
+#Login from jump host using sftp connection
+sftp yousuf@stapp02

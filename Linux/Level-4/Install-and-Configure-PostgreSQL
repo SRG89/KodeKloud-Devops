@@ -1,0 +1,52 @@
+# Problem Statement
+#
+#
+# The Nautilus application development team has shared that 
+# they are planning to deploy one newly developed application 
+# on Nautilus infra in Stratos DC. The application uses PostgreSQL 
+# database, so as a pre-requisite we need to set up PostgreSQL 
+# database server as per requirements shared below:
+#
+#
+#
+#PostgreSQL database server is already installed on the Nautilus 
+#database server.
+#
+#
+# a. Create a database user kodekloud_roy and set its password to 8FmzjvFU6S.
+# b. Create a database kodekloud_db6 and grant full permissions to user 
+#    kodekloud_roy on this database.
+#
+#
+#
+# Solution Script:
+#
+#
+# access to the database server
+ssh peter@stdb01
+# switch to root user
+sudo su -
+# check the status of the postgres
+systemctl status postgresql
+# connect to PostgreSQL using psql
+psql -U postgres
+# check the list of users on the database
+\du
+# create a user as mentioned in the task
+CREATE USER kodekloud_roy WITH PASSWORD '8FmzjvFU6S';
+# create a database
+CREATE DATABASE kodekloud_db6;
+# grant all privileges on newly created database
+# for user kodekloud_roy
+GRANT ALL PRIVILEGES ON DATABASE "kodekloud_db6" to kodekloud_roy;
+# exit the postgres
+\q
+# Note: we create kodekloud_db6 database with postgres rolename/user.
+# However, if we want to create database with different user then 
+# we have to add appropriate attributes for that role/user.
+# For example we want to create database with user kodekloud_roy 
+# then we need to add attibute for that user
+ALTER USER kodekloud_roy CREATEDB;
+# This will add new attribute for user kodekloud_roy and thus
+# make user able to create the database.
+

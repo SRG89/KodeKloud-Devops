@@ -1,0 +1,78 @@
+# Problem Statement
+#
+# Here are a number of parameters that are used by the applications.We need to 
+# define these as environment variables, so that we can use them as needed 
+# within different configs.Below is a scenario which needs to be configured 
+# on Kubernetes cluster.Please find below more details about the same.
+#
+# Create a pod named envars.
+# Container name should be fieldref-container, use image busybox preferable 
+# latest tag, use command 'sh', '-c' and args should be
+# while true; do echo -en '/n'; printenv NODE_NAME POD_NAME;
+# printenv POD_IP POD_SERVICE_ACCOUNT; sleep 10;done;'
+#
+# Define Four environment variables as mentioned below:
+#
+# The first env should be named as NODE_NAME, set valueFrom fieldref 
+# and fieldPath should be spec.nodeName.
+#
+# The second env should be named as POD_NAME, set valueFrom fieldref and 
+# fieldPath should be metadata.name.
+# 
+# The third env should be named as POD_IP, set valueFrom fieldref and 
+# fieldPath should be status.podIP.
+#
+# The fourth env should be named as POD_SERVICE_ACCOUNT, set valueFrom 
+# fieldref and fieldPath shoulbe be spec.serviceAccountName.
+#
+# Solution Script
+#
+# manifest the yaml file
+kubectl run envars --image=httpd:latest --dry-run=client -o yaml > pod.yaml
+# edit yaml file as instructed in the task
+vi pod.yaml
+cat pod.yaml
+#------------------------------------------------------------------
+#
+# content of yaml file
+#
+apiVersion: v1
+kind: Pod
+metadata:
+  name: envars
+spec:
+  containers:
+  - image: httpd:latest
+    name: fieldref-container
+    command: [ "sh", "-c"]
+    args:
+    - while true; do
+        echo -en '\n';
+        printenv NODE_NAME POD_NAME;
+        printenv POD_IP POD_SERVICE_ACCOUNT;
+        sleep 10;
+      done;
+    env:
+      - name: NODE_NAME
+        valueFrom:
+          fieldRef:
+            fieldPath: spec.nodeName
+      - name: POD_NAME
+        valueFrom:
+          fieldRef:
+            fieldPath: metadata.name
+      - name: POD_IP
+        valueFrom:
+          fieldRef:
+            fieldPath: status.podIP
+      - name: POD_SERVICE_ACCOUNT
+        valueFrom:
+          fieldRef:
+            fieldPath: spec.serviceAccountName
+  restartPolicy: Never
+#--------------------------------------------------------------------------
+#
+# validate the task by checking the output.Access the pod using executive 
+# privilege and then use printenv command
+kubectl exec -it envars -c fieldref-container -- /bin/bash
+printenv

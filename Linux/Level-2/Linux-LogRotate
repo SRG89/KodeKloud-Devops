@@ -1,0 +1,59 @@
+# Problem Statement:
+#
+# The Nautilus DevOps team is ready to launch a new application, 
+# which they will deploy on app servers in Stratos Datacenter. 
+# They are expecting significant traffic/usage of tomcat on app servers 
+# after that. This will generate massive logs, creating huge log files. 
+# To utilise the storage efficiently, they need to compress the log 
+# files and need to rotate old logs. Check the requirements shared below:
+#
+#
+# a. In all app servers install tomcat package.
+# b. Using logrotate configure tomcat logs rotation to monthly
+#    and keep only 3 rotated
+#
+#
+# Solution Script:
+#
+# access all app server. We are only showing application one server
+ssh tony@stapp01
+# install tomcat and logrotate
+yum install -y tomcat logrotate
+# start and enable tomcat service
+systemctl start tomcat
+systemctl enable tomcat
+# access the path of logrotate configuration file
+find /etc/ -type f -name logrotate.conf
+# edit the logrotate config file
+vi /etc/logrotate.conf
+#varify the update using cat
+cat /etc/logrotate.conf
+#-------------------------------------------------------------------
+#
+## see "man logrotate" for details
+# rotate log files monthly
+monthly
+# keep 3 weeks worth of backlogs
+rotate 3
+# create new (empty) log files after rotating old ones
+create
+# use date as a suffix of the rotated file
+dateext
+# uncomment this if you want your log files compressed
+#compress
+# RPM packages drop log rotation information into this directory
+include /etc/logrotate.d
+# system-specific logs may be also be configured here.
+#---------------------------------------------------------------------
+#Now configure the following file
+vi /etc/logrotate.d/tomcat
+# verify the content of file using cat
+cat /etc/logrotate.d/tomcat
+#------------------------------------------------
+/{PATH_TO_CATALINA_FILE}/catalina*.* {
+copytruncate
+monthly
+rotate 3
+missingok
+}
+#-----------------------------------------------

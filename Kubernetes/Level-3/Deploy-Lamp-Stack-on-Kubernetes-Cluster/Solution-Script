@@ -1,0 +1,15 @@
+# create resource config map, deployment and services from Lamp-Stack-Yaml-File
+#
+# copy index.php file from jump host to httpd-php container
+kubectl cp /tmp/index.php lamp-wp-6d66967b4f-62f4t:/app/ -c httpd-php-container
+# access httpd-php container using executive privilege
+kubectl exec -it lamp-wp-6d66967b4f-62f4t -c httpd-php-container -- /bin/bash
+# update the index.php file as required
+vi /app/index.php
+# restart httpd service within httpd-php-container
+service httpd restart
+# exit the container
+exit
+# validate the task by accessing the app content from jump host
+curl http://localhost:30008
+

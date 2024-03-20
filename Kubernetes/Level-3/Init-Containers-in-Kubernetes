@@ -1,0 +1,82 @@
+# Problem Statement
+#
+#
+# There are some applications that need to be deployed on Kubernetes cluster 
+# and these apps have some pre-requisites where some configurations need to 
+# be changed before deploying the app container.Some of these changes cannot 
+# be made inside the images so the DevOps team has come up with a solution to 
+# use init containers to perform these tasks during deployment.Below is a 
+# sample scenario that the team is going to test first.
+#
+#
+# Create a Deployment named as ic-deploy-xfusion.
+#
+# Configure spec as replicas should be 1,labels app should be ic-xfusion,
+# template's metadata lables app should be the same ic-xfusion.
+# 
+# The initContainers should be named as ic-msg-xfusion, use image ubuntu,
+# preferably with latest tag and use command '/bin/bash', '-c' and 
+# 'echo Init Done - Welcome to xFusionCorp Industries > /ic/media'.
+# The volume mount should be named as ic-volume-xfusion and mount path 
+# should be /ic.
+#
+# Main container should be named as ic-main-xfusion, use image ubuntu,
+# preferably with latest tag and use command '/bin/bash', '-c' and 
+# 'while true; do cat /ic/media; sleep 5; done'. The volume mount should 
+# be named as ic-volume-xfusion and mount path should be /ic.
+#
+# Solution Script
+#
+#
+# manifest yaml file for resource deployment
+kubectl create deploy ic-deploy-xfusion --image=ubuntu:latest --dry-run=client -o yaml > app.yaml
+# edit yaml file as instructed in task
+vi app.yaml
+cat app.yaml
+#------------------------------------------------------
+#
+# content of yaml file
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ic-deploy-xfusion
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ic-xfusion
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: ic-xfusion
+    spec:
+      volumes:
+      - name: ic-volume-xfusion
+        emptyDir: {}
+      containers:
+      - image: ubuntu:latest
+        name: ic-main-xfusion
+        command: ["/bin/bash"]
+        args: ["-c", "while true; do cat /ic/media; sleep 10;done"]
+        volumeMounts:
+        - name: ic-volume-xfusion
+          mountPath: /ic
+      initContainers:
+      - image: ubuntu:latest
+        name: ic-msg-xfusion
+        command: ["/bin/bash"]
+        args: ["-c", "echo Init Done - Welcome to xFusionCorp Industries 
+	         > /ic/media"]
+        volumeMounts:
+        - name: ic-volume-xfusion
+          mountPath: /ic
+#-----------------------------------------------------------------------
+#
+# create deployment resource from yaml file
+kubectl create -f app.yaml
+# validate the task by listing deployment 
+kubectl get deploy ic-deploy-xfusion -o wide
+
+
+

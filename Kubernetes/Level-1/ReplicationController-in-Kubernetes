@@ -1,0 +1,53 @@
+# Problem Statement
+#
+#
+# The Nautilus DevOps team wants to create a ReplicationController to 
+# deploy several pods.They are going to deploy applications on these pods,
+# these applications need highly available infrastructure.Below you can 
+# find exact details,create the ReplicationController accordingly.
+#
+#
+# Create a ReplicationController using httpd image,preferably with 
+# latest tag, and name it as httpd-replicationcontroller.
+#
+# Labels app should be httpd_app, and labels type should be front-end. 
+# The container should be named as httpd-container and also make sure 
+# replica counts are 3.
+#
+# Solution Script 
+#
+# create a yaml file for resource replicationcontroller
+vi replica.yaml
+cat replica.yaml
+#-----------------------------------------------------------
+#
+# content of replication controller
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  labels:
+    app: httpd_app
+    type: front-end
+  name: httpd-replicationcontroller
+spec:
+  replicas: 3
+  selector:
+    app: httpd-pod
+  template:
+    metadata:
+      name: httpd
+      labels:
+        app: httpd-pod
+    spec:
+      containers:
+      - name: httpd-container
+        image: httpd:latest
+        ports:
+        - containerPort: 80
+#---------------------------------------------------------
+#
+# create resource replicationcontroller from yaml file
+kubectl create -f replica.yaml
+# validate the task by listing the resource replication controller
+kubectl get rc -o wide
+

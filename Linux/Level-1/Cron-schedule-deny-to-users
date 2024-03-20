@@ -1,0 +1,18 @@
+# Problem Statement
+#
+#
+#To stick with the security compliances, the Nautilus project team has decided to apply some restrictions 
+#on crontab access so that only allowed users can create/update the cron jobs. 
+#Limit crontab access to below specified users on App Server 2.
+#
+#Allow crontab access to yousuf user and deny the same to ryan user.
+#
+# Solution Script
+#
+# access application server using ssh command
+ssh steve@stapp02
+# provide crontab access user yousuf 
+echo 'yousuf' > /etc/cron.allow
+# Deny crontab access to user ryan
+echo 'ryan' > /etc/cron.deny
+

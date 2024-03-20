@@ -1,0 +1,17 @@
+# Problem Statement:
+#
+#During the daily standup, it was pointed out that the timezone across Nautilus Application Servers in Stratos Datacenter 
+#doesn't match with that of the local datacenter's timezone, which is Pacific/Norfolk.
+#
+#
+#Correct the mismatch.
+#
+#
+# Solution Script:
+#
+#access all three application servers using ssh command. We are only showing solution for server one.
+ssh tony@stapp01
+#get the current time zone using timedatectl command
+timedatectl | grep 'Time zone'
+#set the Pacific/Norfolk time-zone on all application servers
+timedatectl set-timezone Pacific/Norfolk

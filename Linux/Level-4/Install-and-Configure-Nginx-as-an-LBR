@@ -1,0 +1,61 @@
+# Problem Statement:
+#
+# Day by day traffic is increasing on one of the websites managed by the 
+# Nautilus production support team.Therefore,the team has observed a 
+# degradation in website performance. Following discussions about 
+# this issue,the team has decided to deploy this application on a 
+# high availability stack i.e on Nautilus infra in Stratos DC.
+# They started the migration last month and it is almost done, 
+# as only the LBR server configuration is pending. Configure LBR server 
+# as per the information given below:
+#
+#
+#
+# a. Install nginx on LBR (load balancer) server.
+# b. Configure load-balancing with the an http context 
+#    making use of all App Servers.
+# c. Also make sure Apache service is up and running on all app servers.
+# d. Once done, you can access the website using StaticApp 
+#    button on the top bar.
+#
+# Solution Script
+#
+# access to load balancer server
+ssh loki@stlb01
+#switch to root user
+sudo su -
+#install nginx
+yum install nginx -y 
+#configure nginx config file
+vi /etc/nginx/nginx.conf
+#verify the added content of the nginx config file
+cat /etc/nginx/nginx.conf
+#----------------------------------------------------------------
+#
+#we have added three application server under upstream 
+#backend and use it to set the proxy_pass 
+upstream backend {
+          server stapp01.stratos.xfusioncorp.com:6300;
+          server stapp02.stratos.xfusioncorp.com:6300;
+          server stapp03.stratos.xfusioncorp.com:6300;
+}
+server {
+        listen       80 default_server;
+        listen       [::]:80 default_server;
+        server_name  _;
+        root         /usr/share/nginx/html;
+
+        # Load configuration files for the default server block.
+        include /etc/nginx/default.d/*.conf;
+
+        location / {
+          proxy_pass http://backend;
+        }
+}
+#------------------------------------------------------------------------
+# restart the service
+systemctl restart nginx
+# validate the task by accessing the web content from jump host
+# via proxy server(load-balancer) at port 80
+curl http://stlb01:80
+

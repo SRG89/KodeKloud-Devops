@@ -1,0 +1,62 @@
+# Problem Statement
+#
+#
+# Nautilus Application development team wants to test the Apache and PHP 
+# setup on one of the app servers in Stratos Datacenter.They want the 
+# DevOps team to prepare an Ansible playbook to accomplish this task.
+# Below you can find more details about the task.
+#
+# There is an inventory file ~/playbooks/inventory on jump host.
+#
+#
+# Create a playbook ~/playbooks/httpd.yml on jump host and perform 
+# the following tasks on App Server 2.
+#
+# Install httpd and php packages (whatever default version is available 
+# in yum repo).
+#
+# Change default document root of Apache to /var/www/html/myroot in 
+# default Apache config /etc/httpd/conf/httpd.conf.Make sure 
+# /var/www/html/myroot path exists (if not please create the same).
+#
+# There is a template ~/playbooks/templates/phpinfo.php.j2 on jump host.
+# Copy this template to the Apache document root you created as 
+# phpinfo.php file and make sure user owner and the group owner for 
+# this file is apache user.
+#
+# Start and enable httpd service.
+#
+#--------------------------------------------------------------------------
+#
+# Ansible -Playbook
+#
+- hosts: stapp02
+  become: yes
+  tasks:
+    - package:
+        name:
+          - httpd
+          - php
+    - replace:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: DocumentRoot \"\/var\/www\/html\"
+        replace: DocumentRoot "/var/www/html/myroot"
+    - file:
+        path: /var/www/html/myroot
+        state: directory
+        owner: apache
+        group: apache
+    - template:
+        src: ~/playbooks/templates/phpinfo.php.j2
+        dest: /var/www/html/myroot/phpinfo.php
+        owner: apache
+        group: apache
+    - service:
+        name: httpd
+        state: started
+        enabled: yes
+#----------------------------------------------------------------------
+#
+# validate the task with below command
+ansible-playbook -i inventory httpd.yml
+
